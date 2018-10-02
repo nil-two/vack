@@ -1,0 +1,321 @@
+#!/bin/sh
+set -eu
+
+VACK_PATH=${VACK_PATH-$HOME/.vim/pack/vack}
+
+usage() {
+  cat <<__USAGE__ >&2
+usage: ${0##*/} <command> [...]
+manage Vim packages.
+
+commands:
+  i|install [-oshH] <repository>...   # install the packages
+  u|update [-ahH] <package>...        # update the packages
+  r|remove <package>...               # remove the packages
+  l|list [-aos]                       # list installed packages
+  p|path [-a] <package>...            # show install directory of the package
+  e|enable <package>...               # move the packages to start
+  d|disable <package>...              # move the packages to opt
+  I|init                              # create the package directory
+  h|help                              # show this help message
+
+environment-variables:
+  VACK_PATH   # the package directory (default: \$HOME/.vim/pack/vack)
+__USAGE__
+}
+
+warn() {
+  printf "%s: %s\n" "${0##*/}" "$*" >&2
+}
+
+to_start_package_path() {
+  package=$1
+  printf "%s\n" "$VACK_PATH/start/${package##*/}"
+}
+
+to_opt_package_path() {
+  package=$1
+  printf "%s\n" "$VACK_PATH/opt/${package##*/}"
+}
+
+to_package_path() {
+  package=$1
+  start=$(to_start_package_path "$package")
+  opt=$(to_opt_package_path "$package")
+  if [ -d "$start" ]; then
+    printf "%s\n" "$start"
+  elif [ -d "$opt" ]; then
+    printf "%s\n" "$opt"
+  else
+    echo
+  fi
+}
+
+to_repository_url() {
+  repository=$1
+  printf "%s\n" "$repository" | awk '
+    /^[^\/]+$/                 { print "git://github.com/vim-scripts/" $0; next }
+    /^[^\/]+\/[^\/]+$/         { print "git://github.com/" $0; next }
+    /^[^\/]+\/[^\/]+\/[^\/]+$/ { print "git://" $0; next }
+                               { print $0; next }
+  '
+}
+
+to_destination_path() {
+  repository=$1
+  mode=$2
+  case $mode in
+    start) printf "%s\n" "$VACK_PATH/start/${repository##*/}"   ;;
+    opt)   printf "%s\n" "$VACK_PATH/opt/${repository##*/}" ;;
+    *)     echo ;;
+  esac
+}
+
+helptags() {
+  package_path=$1
+  doc_path=$package_path/doc
+  if [ -d "$doc_path" ]; then
+    vim +"helptags $package_path/doc" +"qa"
+  fi
+}
+
+sub_install() {
+  mode=start
+  do_helptags=true
+  while getopts "os" OPT; do
+    case $OPT in
+      s) mode=start ;;
+      o) mode=opt ;;
+      h) do_helptags=true ;;
+      H) do_helptags=false ;;
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if [ $# -lt 1 ]; then
+    warn "no input repositories"
+    exit 2
+  fi
+
+  for repository in "$@"; do
+    url=$(to_repository_url "$repository")
+    path=$(to_destination_path "$repository" "$mode")
+    if [ ! -d "$path" ]; then
+      git clone --quiet -- "$url" "$path"
+    fi
+    if "$do_helptags"; then
+      helptags "$path"
+    fi
+  done
+}
+
+sub_update() {
+  updates_all=false
+  do_helptags=false
+  while getopts "a" OPT; do
+    case $OPT in
+      a) updates_all=true ;;
+      h) do_helptags=true ;;
+      H) do_helptags=false ;;
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if ! "$updates_all" && [ $# -lt 1 ]; then
+    warn "no input packages"
+    exit 2
+  fi
+
+  if "$updates_all"; then
+    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+      if [ -d "$path" ]; then
+        (cd "$path"; git pull --quiet --no-ff)
+      fi
+      if "$do_helptags"; then
+        helptags "$path"
+      fi
+    done
+  else
+    for package in "$@"; do
+      path=$(to_package_path "$package")
+      if [ -d "$path" ]; then
+        (cd "$path"; git pull --quiet --no-ff)
+      fi
+      if "$do_helptags"; then
+        helptags "$path"
+      fi
+    done
+  fi
+}
+
+sub_remove() {
+  while getopts "" OPT; do
+    case $OPT in
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if [ $# -lt 1 ]; then
+    warn "no input packages"
+    exit 2
+  fi
+
+  for package in "$@"; do
+    path=$(to_package_path "$package")
+    if [ -d "$path" ]; then
+      rm -rf -- "$path"
+    fi
+  done
+}
+
+sub_list() {
+  mode=all
+  while getopts "aos" OPT; do
+    case $OPT in
+      a) mode=all ;;
+      s) mode=start ;;
+      o) mode=opt ;;
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  case $mode in
+    all)
+      ls -- "$VACK_PATH/start" | cat
+      ls -- "$VACK_PATH/opt" | cat
+      ;;
+    start)
+      ls -- "$VACK_PATH/start" | cat
+      ;;
+    opt)
+      ls -- "$VACK_PATH/opt" | cat
+      ;;
+  esac
+}
+
+sub_path() {
+  show_all=false
+  while getopts "a" OPT; do
+    case $OPT in
+      a) show_all=true ;;
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if ! "$show_all" && [ $# -lt 1 ]; then
+    warn "no input packages"
+    exit 2
+  fi
+
+  if "$show_all"; then
+    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+      if [ -d "$path" ]; then
+        printf "%s\n" "$path"
+      fi
+    done
+  else
+    for package in "$@"; do
+      path=$(to_package_path "$package")
+      if [ -d "$path" ]; then
+        printf "%s\n" "$path"
+      fi
+    done
+  fi
+}
+
+sub_enable() {
+  while getopts "" OPT; do
+    case $OPT in
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if [ $# -lt 1 ]; then
+    warn "no input packages"
+    exit 2
+  fi
+
+  for package in "$@"; do
+    src=$(to_opt_package_path "$package")
+    dst=$(to_start_package_path "$package")
+    if [ -d "$src" ] && [ ! -d "$dst" ]; then
+      mv -- "$src" "$dst"
+    fi
+  done
+}
+
+sub_disable() {
+  while getopts "" OPT; do
+    case $OPT in
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  if [ $# -lt 1 ]; then
+    warn "no input packages"
+    exit 2
+  fi
+
+  for package in "$@"; do
+    src=$(to_start_package_path "$package")
+    dst=$(to_opt_package_path "$package")
+    if [ -d "$src" ] && [ ! -d "$dst" ]; then
+      mv -- "$src" "$dst"
+    fi
+  done
+}
+
+sub_init() {
+  while getopts "" OPT; do
+    case $OPT in
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  mkdir -p -- "$VACK_PATH"
+  mkdir -p -- "$VACK_PATH/start"
+  mkdir -p -- "$VACK_PATH/opt"
+}
+
+sub_help() {
+  while getopts "" OPT; do
+    case $OPT in
+      *) exit 2 ;;
+    esac
+  done
+  shift $(($OPTIND - 1))
+
+  usage
+}
+
+main() {
+  if [ $# -lt 1 ]; then
+    usage
+    exit 2
+  fi
+
+  cmd=$1
+  shift
+  case $cmd in
+    i|install) sub_install "$@" ;;
+    u|update)  sub_update  "$@" ;;
+    r|remove)  sub_remove  "$@" ;;
+    l|list)    sub_list    "$@" ;;
+    p|path)    sub_path    "$@" ;;
+    e|enable)  sub_enable  "$@" ;;
+    d|disable) sub_disable "$@" ;;
+    I|init)    sub_init    "$@" ;;
+    h|help)    sub_help    "$@" ;;
+    *) warn "$cmd: sub command not found"; exit 2 ;;
+  esac
+}
+
+main "$@"
