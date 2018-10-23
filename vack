@@ -82,7 +82,7 @@ helptags() {
 sub_install() {
   mode=start
   do_helptags=true
-  while getopts "os" OPT; do
+  while getopts "oshH" OPT; do
     case $OPT in
       s) mode=start ;;
       o) mode=opt ;;
@@ -113,7 +113,7 @@ sub_install() {
 sub_update() {
   updates_all=false
   do_helptags=false
-  while getopts "a" OPT; do
+  while getopts "ahH" OPT; do
     case $OPT in
       a) updates_all=true ;;
       h) do_helptags=true ;;
