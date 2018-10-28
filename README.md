@@ -179,6 +179,13 @@ Variables
 The path of the root package directory.
 Default value is `$HOME/.vim/pack/vack`.
 
+Misc
+----
+
+### misc/vack.bash
+
+It provides an auto-completion for Bash.
+
 License
 -------
 
