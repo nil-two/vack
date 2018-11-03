@@ -75,7 +75,7 @@ _vack()
               COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
               ;;
             *)
-              local pkgs=$(vack list -s)
+              local pkgs=$(vack list -o)
               COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
               ;;
           esac
@@ -87,7 +87,7 @@ _vack()
               COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
               ;;
             *)
-              local pkgs=$(vack list -o)
+              local pkgs=$(vack list -s)
               COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
               ;;
           esac
