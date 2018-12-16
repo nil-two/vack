@@ -33,6 +33,11 @@ environment-variables:
   VACK_PATH   # the package directory (default: $HOME/.vim/pack/vack)
 ```
 
+Requirements
+------------
+
+- Git
+
 Installtion
 -----------
 
