@@ -144,14 +144,14 @@ cmd_update() {
 
   if "$update_all"; then
     for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
-      if [ -d "$path" ]; then
+      if [ -d "$path" ] && [ -d "$path/.git" ]; then
         (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
     done
   else
     for package in "$@"; do
       path=$(to_installed_package_path "$package")
-      if [ -d "$path" ]; then
+      if [ -d "$path" ] && [ -d "$path/.git" ]; then
         (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
     done
