@@ -84,15 +84,6 @@ list_all_package() {
   list_opt_package
 }
 
-list_all_package_path() {
-  for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
-    if [ -d "$path" ]; then
-      printf "%s\n" "$path"
-    fi
-  done
-}
-
-
 helptags() {
   package_path=$1
   doc_path=$package_path/doc
@@ -214,7 +205,11 @@ cmd_path() {
   fi
 
   if "$show_all"; then
-    list_all_package_path
+    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+      if [ -d "$path" ]; then
+        printf "%s\n" "$path"
+      fi
+    done
   else
     for package in "$@"; do
       path=$(to_installed_package_path "$package")
