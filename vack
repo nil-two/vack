@@ -124,7 +124,7 @@ cmd_install() {
     src_url=$(to_source_url "$package")
     dst_path=$(to_destination_package_path "$package" "$package_type")
     if [ ! -d "$dst_path" ]; then
-      git clone --quiet -- "$src_url" "$dst_path"
+      git clone --quiet --depth=1 -- "$src_url" "$dst_path"
     fi
     if "$do_helptags"; then
       helptags "$dst_path"
