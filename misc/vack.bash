@@ -13,7 +13,7 @@ _vack()
         i|install)
           case $cur in
             -*)
-              local opts="-o -s -h -H --"
+              local opts="-o -s --"
               COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
               ;;
             *)
@@ -24,7 +24,7 @@ _vack()
         u|update)
           case $cur in
             -)
-              local opts="-a -h -H --"
+              local opts="-a --"
               COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
               ;;
             *)
