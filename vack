@@ -25,7 +25,7 @@ __USAGE__
 }
 
 warn() {
-  printf "%s: %s\n" "${0##*/}" "$*" >&2
+  printf "%s\n" "${0##*/}: $*" >&2
 }
 
 to_start_package_path() {
@@ -38,7 +38,7 @@ to_opt_package_path() {
   printf "%s\n" "$VACK_PATH/opt/${package##*/}"
 }
 
-to_package_path() {
+to_installed_package_path() {
   package=$1
   start=$(to_start_package_path "$package")
   opt=$(to_opt_package_path "$package")
@@ -51,9 +51,19 @@ to_package_path() {
   fi
 }
 
-to_repository_url() {
-  repository=$1
-  printf "%s\n" "$repository" | awk '
+to_destination_package_path() {
+  package=$1
+  package_type=$2
+  case $package_type in
+    start) printf "%s\n" "$(to_start_package_path "$package")" ;;
+    opt)   printf "%s\n" "$(to_opt_package_path "$package")" ;;
+    *)     echo ;;
+  esac
+}
+
+to_source_url() {
+  package=$1
+  printf "%s\n" "$package" | awk '
     /^[^\/]+$/                 { print "git://github.com/vim-scripts/" $0; next }
     /^[^\/]+\/[^\/]+$/         { print "git://github.com/" $0; next }
     /^[^\/]+\/[^\/]+\/[^\/]+$/ { print "git://" $0; next }
@@ -61,31 +71,43 @@ to_repository_url() {
   '
 }
 
-to_destination_path() {
-  repository=$1
-  mode=$2
-  case $mode in
-    start) printf "%s\n" "$VACK_PATH/start/${repository##*/}"   ;;
-    opt)   printf "%s\n" "$VACK_PATH/opt/${repository##*/}" ;;
-    *)     echo ;;
-  esac
+list_start_package() {
+  ls -- "$VACK_PATH/start" | cat
 }
+
+list_opt_package() {
+  ls -- "$VACK_PATH/opt" | cat
+}
+
+list_all_package() {
+  list_start_package
+  list_opt_package
+}
+
+list_all_package_path() {
+  for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+    if [ -d "$path" ]; then
+      printf "%s\n" "$path"
+    fi
+  done
+}
+
 
 helptags() {
   package_path=$1
   doc_path=$package_path/doc
   if [ -d "$doc_path" ]; then
-    vim +"helptags $package_path/doc" +"qa"
+    vim +"helptags $doc_path" +"qa"
   fi
 }
 
-sub_install() {
-  mode=start
+cmd_install() {
+  package_type=start
   do_helptags=true
   while getopts "oshH" OPT; do
     case $OPT in
-      s) mode=start ;;
-      o) mode=opt ;;
+      s) package_type=start ;;
+      o) package_type=opt ;;
       h) do_helptags=true ;;
       H) do_helptags=false ;;
       *) exit 2 ;;
@@ -94,28 +116,28 @@ sub_install() {
   shift $(($OPTIND - 1))
 
   if [ $# -lt 1 ]; then
-    warn "no input repositories"
+    warn "no input packages"
     exit 2
   fi
 
-  for repository in "$@"; do
-    url=$(to_repository_url "$repository")
-    path=$(to_destination_path "$repository" "$mode")
-    if [ ! -d "$path" ]; then
-      git clone --quiet -- "$url" "$path"
+  for package in "$@"; do
+    src_url=$(to_source_url "$package")
+    dst_path=$(to_destination_package_path "$package" "$package_type")
+    if [ ! -d "$dst_path" ]; then
+      git clone --quiet -- "$src_url" "$dst_path"
     fi
     if "$do_helptags"; then
-      helptags "$path"
+      helptags "$dst_path"
     fi
   done
 }
 
-sub_update() {
-  updates_all=false
+cmd_update() {
+  update_all=false
   do_helptags=false
   while getopts "ahH" OPT; do
     case $OPT in
-      a) updates_all=true ;;
+      a) update_all=true ;;
       h) do_helptags=true ;;
       H) do_helptags=false ;;
       *) exit 2 ;;
@@ -123,12 +145,12 @@ sub_update() {
   done
   shift $(($OPTIND - 1))
 
-  if ! "$updates_all" && [ $# -lt 1 ]; then
+  if ! "$update_all" && [ $# -lt 1 ]; then
     warn "no input packages"
     exit 2
   fi
 
-  if "$updates_all"; then
+  if "$update_all"; then
     for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
       if [ -d "$path" ]; then
         (cd "$path"; git pull --quiet --no-ff)
@@ -139,7 +161,7 @@ sub_update() {
     done
   else
     for package in "$@"; do
-      path=$(to_package_path "$package")
+      path=$(to_installed_package_path "$package")
       if [ -d "$path" ]; then
         (cd "$path"; git pull --quiet --no-ff)
       fi
@@ -150,7 +172,7 @@ sub_update() {
   fi
 }
 
-sub_remove() {
+cmd_remove() {
   while getopts "" OPT; do
     case $OPT in
       *) exit 2 ;;
@@ -164,40 +186,33 @@ sub_remove() {
   fi
 
   for package in "$@"; do
-    path=$(to_package_path "$package")
+    path=$(to_installed_package_path "$package")
     if [ -d "$path" ]; then
       rm -rf -- "$path"
     fi
   done
 }
 
-sub_list() {
-  mode=all
+cmd_list() {
+  package_type=all
   while getopts "aos" OPT; do
     case $OPT in
-      a) mode=all ;;
-      s) mode=start ;;
-      o) mode=opt ;;
+      a) package_type=all ;;
+      s) package_type=start ;;
+      o) package_type=opt ;;
       *) exit 2 ;;
     esac
   done
   shift $(($OPTIND - 1))
 
-  case $mode in
-    all)
-      ls -- "$VACK_PATH/start" | cat
-      ls -- "$VACK_PATH/opt" | cat
-      ;;
-    start)
-      ls -- "$VACK_PATH/start" | cat
-      ;;
-    opt)
-      ls -- "$VACK_PATH/opt" | cat
-      ;;
+  case $package_type in
+    all)   list_all_package   ;;
+    start) list_start_package ;;
+    opt)   list_opt_package   ;;
   esac
 }
 
-sub_path() {
+cmd_path() {
   show_all=false
   while getopts "a" OPT; do
     case $OPT in
@@ -213,14 +228,10 @@ sub_path() {
   fi
 
   if "$show_all"; then
-    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
-      if [ -d "$path" ]; then
-        printf "%s\n" "$path"
-      fi
-    done
+    list_all_package_path
   else
     for package in "$@"; do
-      path=$(to_package_path "$package")
+      path=$(to_installed_package_path "$package")
       if [ -d "$path" ]; then
         printf "%s\n" "$path"
       fi
@@ -228,7 +239,7 @@ sub_path() {
   fi
 }
 
-sub_enable() {
+cmd_enable() {
   while getopts "" OPT; do
     case $OPT in
       *) exit 2 ;;
@@ -250,7 +261,7 @@ sub_enable() {
   done
 }
 
-sub_disable() {
+cmd_disable() {
   while getopts "" OPT; do
     case $OPT in
       *) exit 2 ;;
@@ -272,7 +283,7 @@ sub_disable() {
   done
 }
 
-sub_init() {
+cmd_init() {
   while getopts "" OPT; do
     case $OPT in
       *) exit 2 ;;
@@ -285,7 +296,7 @@ sub_init() {
   mkdir -p -- "$VACK_PATH/opt"
 }
 
-sub_help() {
+cmd_help() {
   while getopts "" OPT; do
     case $OPT in
       *) exit 2 ;;
@@ -305,15 +316,15 @@ main() {
   cmd=$1
   shift
   case $cmd in
-    i|install) sub_install "$@" ;;
-    u|update)  sub_update  "$@" ;;
-    r|remove)  sub_remove  "$@" ;;
-    l|list)    sub_list    "$@" ;;
-    p|path)    sub_path    "$@" ;;
-    e|enable)  sub_enable  "$@" ;;
-    d|disable) sub_disable "$@" ;;
-    I|init)    sub_init    "$@" ;;
-    h|help)    sub_help    "$@" ;;
+    i|install) cmd_install "$@" ;;
+    u|update)  cmd_update  "$@" ;;
+    r|remove)  cmd_remove  "$@" ;;
+    l|list)    cmd_list    "$@" ;;
+    p|path)    cmd_path    "$@" ;;
+    e|enable)  cmd_enable  "$@" ;;
+    d|disable) cmd_disable "$@" ;;
+    I|init)    cmd_init    "$@" ;;
+    h|help)    cmd_help    "$@" ;;
     *) warn "$cmd: sub command not found"; exit 2 ;;
   esac
 }
