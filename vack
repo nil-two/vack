@@ -9,15 +9,15 @@ usage: ${0##*/} <command> [...]
 manage Vim packages.
 
 commands:
-  i|install [-oshH] <repository>...   # install the packages
-  u|update [-ahH] <package>...        # update the packages
-  r|remove <package>...               # remove the packages
-  l|list [-aos]                       # list installed packages
-  p|path [-a] <package>...            # show install directory of the package
-  e|enable <package>...               # move the packages to start
-  d|disable <package>...              # move the packages to opt
-  I|init                              # create the package directory
-  h|help                              # show this help message
+  i|install [-os] <repository>...   # install the packages
+  u|update [-a] <package>...        # update the packages
+  r|remove <package>...             # remove the packages
+  l|list [-aos]                     # list installed packages
+  p|path [-a] <package>...          # show install directory of the package
+  e|enable <package>...             # move the packages to start
+  d|disable <package>...            # move the packages to opt
+  I|init                            # create the package directory
+  h|help                            # show this help message
 
 environment-variables:
   VACK_PATH   # the package directory (default: \$HOME/.vim/pack/vack)
@@ -103,13 +103,10 @@ helptags() {
 
 cmd_install() {
   package_type=start
-  do_helptags=true
   while getopts "oshH" OPT; do
     case $OPT in
       s) package_type=start ;;
       o) package_type=opt ;;
-      h) do_helptags=true ;;
-      H) do_helptags=false ;;
       *) exit 2 ;;
     esac
   done
@@ -125,8 +122,6 @@ cmd_install() {
     dst_path=$(to_destination_package_path "$package" "$package_type")
     if [ ! -d "$dst_path" ]; then
       git clone --quiet --depth=1 -- "$src_url" "$dst_path"
-    fi
-    if "$do_helptags"; then
       helptags "$dst_path"
     fi
   done
@@ -134,12 +129,9 @@ cmd_install() {
 
 cmd_update() {
   update_all=false
-  do_helptags=false
   while getopts "ahH" OPT; do
     case $OPT in
       a) update_all=true ;;
-      h) do_helptags=true ;;
-      H) do_helptags=false ;;
       *) exit 2 ;;
     esac
   done
@@ -153,20 +145,14 @@ cmd_update() {
   if "$update_all"; then
     for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
       if [ -d "$path" ]; then
-        (cd "$path"; git pull --quiet --no-ff)
-      fi
-      if "$do_helptags"; then
-        helptags "$path"
+        (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
     done
   else
     for package in "$@"; do
       path=$(to_installed_package_path "$package")
       if [ -d "$path" ]; then
-        (cd "$path"; git pull --quiet --no-ff)
-      fi
-      if "$do_helptags"; then
-        helptags "$path"
+        (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
     done
   fi

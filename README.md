@@ -19,18 +19,18 @@ $ vack <command> [...]
 manage Vim packages.
 
 commands:
-  i|install [-ohHs] <repository>...   # install the packages
-  u|update [-ahH] <package>...        # update the packages
-  r|remove <package>...               # remove the packages
-  l|list [-aos]                       # list installed packages
-  p|path [-a] <package>...            # show install directories of the packages
-  e|enable <package>...               # move the packages to start
-  d|disable <package>...              # move the packages to opt
-  I|init                              # create the root package directory
-  h|help                              # show this help message
+  i|install [-os] <repository>...   # install the packages
+  u|update [-a] <package>...        # update the packages
+  r|remove <package>...             # remove the packages
+  l|list [-aos]                     # list installed packages
+  p|path [-a] <package>...          # show install directory of the package
+  e|enable <package>...             # move the packages to start
+  d|disable <package>...            # move the packages to opt
+  I|init                            # create the package directory
+  h|help                            # show this help message
 
 environment-variables:
-  VACK_PATH   # the root package directory (default: $HOME/.vim/pack/vack)
+  VACK_PATH   # the package directory (default: $HOME/.vim/pack/vack)
 ```
 
 Installtion
@@ -48,7 +48,7 @@ chmod 755 ~/bin/vack
 Commands
 --------
 
-### vack install [-ohHs] \<repository\>...   
+### vack install [-os] \<repository\>...   
 
 Install the packages from the repositories.
 
@@ -56,11 +56,6 @@ Install the packages from the repositories.
 If `-o` is specified, they will be installed in `opt`,
 and if `-s` is specified, they will be installed in `start`.
 By default they will be installed to `start`.
-
-`-h` and `-H` are flags that decide whether to execute `helptsgs`.
-If `-h` is specified, it will be execute,
-and if `-H` is specified, it won't be execute.
-By default it will be executed.
 
 ```
 $ vack i kusabashira/vim-incopen
@@ -70,16 +65,11 @@ $ vack i -Ho kusabashira/vim-incopen
 (Install vim-incopen in opt and don't execute helptags)
 ```
 
-### vack update [-ahH] \<package\>...        
+### vack update [-a] \<package\>...        
 
 Update the packages.
 
 If `-a` is specified, all packages will be updated.
-
-`-h` and `-H` are flags that decide whether to execute `helptsgs`.
-If `-h` is specified, it will be execute,
-and if `-H` is specified, it won't be execute.
-By default it will be executed.
 
 ```
 $ vack u kusabashira/vim-incopen
