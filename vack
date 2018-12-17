@@ -94,10 +94,10 @@ helptags() {
 
 cmd_install() {
   package_type=start
-  while getopts "oshH" OPT; do
+  while getopts "os" OPT; do
     case $OPT in
-      s) package_type=start ;;
       o) package_type=opt ;;
+      s) package_type=start ;;
       *) exit 2 ;;
     esac
   done
@@ -120,7 +120,7 @@ cmd_install() {
 
 cmd_update() {
   update_all=false
-  while getopts "ahH" OPT; do
+  while getopts "a" OPT; do
     case $OPT in
       a) update_all=true ;;
       *) exit 2 ;;
@@ -175,8 +175,8 @@ cmd_list() {
   while getopts "aos" OPT; do
     case $OPT in
       a) package_type=all ;;
-      s) package_type=start ;;
       o) package_type=opt ;;
+      s) package_type=start ;;
       *) exit 2 ;;
     esac
   done
