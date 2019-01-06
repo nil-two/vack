@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-VACK_PATH=${VACK_PATH-$HOME/.vim/pack/vack}
+VACKPATH=${VACKPATH-$HOME/.vim/pack/vack}
 
 usage() {
   cat <<__USAGE__ >&2
@@ -20,7 +20,7 @@ commands:
   h|help                            # show this help message
 
 environment-variables:
-  VACK_PATH   # the package directory (default: \$HOME/.vim/pack/vack)
+  VACKPATH   # the package directory (default: \$HOME/.vim/pack/vack)
 __USAGE__
 }
 
@@ -30,12 +30,12 @@ warn() {
 
 to_start_package_path() {
   package=$1
-  printf "%s\n" "$VACK_PATH/start/${package##*/}"
+  printf "%s\n" "$VACKPATH/start/${package##*/}"
 }
 
 to_opt_package_path() {
   package=$1
-  printf "%s\n" "$VACK_PATH/opt/${package##*/}"
+  printf "%s\n" "$VACKPATH/opt/${package##*/}"
 }
 
 to_installed_package_path() {
@@ -72,11 +72,11 @@ to_source_url() {
 }
 
 list_start_package() {
-  ls -- "$VACK_PATH/start" | cat
+  ls -- "$VACKPATH/start" | cat
 }
 
 list_opt_package() {
-  ls -- "$VACK_PATH/opt" | cat
+  ls -- "$VACKPATH/opt" | cat
 }
 
 list_all_package() {
@@ -134,7 +134,7 @@ cmd_update() {
   fi
 
   if "$update_all"; then
-    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+    for path in "$VACKPATH/start/"* "$VACKPATH/opt/"*; do
       if [ -d "$path" ] && [ -d "$path/.git" ]; then
         (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
@@ -205,7 +205,7 @@ cmd_path() {
   fi
 
   if "$show_all"; then
-    for path in "$VACK_PATH/start/"* "$VACK_PATH/opt/"*; do
+    for path in "$VACKPATH/start/"* "$VACKPATH/opt/"*; do
       if [ -d "$path" ]; then
         printf "%s\n" "$path"
       fi
@@ -272,9 +272,9 @@ cmd_init() {
   done
   shift $(($OPTIND - 1))
 
-  mkdir -p -- "$VACK_PATH"
-  mkdir -p -- "$VACK_PATH/start"
-  mkdir -p -- "$VACK_PATH/opt"
+  mkdir -p -- "$VACKPATH"
+  mkdir -p -- "$VACKPATH/start"
+  mkdir -p -- "$VACKPATH/opt"
 }
 
 cmd_help() {

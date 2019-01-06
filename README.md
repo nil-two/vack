@@ -30,7 +30,7 @@ commands:
   h|help                            # show this help message
 
 environment-variables:
-  VACK_PATH   # the package directory (default: $HOME/.vim/pack/vack)
+  VACKPATH   # the package directory (default: $HOME/.vim/pack/vack)
 ```
 
 Requirements
@@ -154,7 +154,7 @@ Create the root package directory.
 
 ```
 $ vack I
-($VACK_PATH will be created)
+($VACKPATH will be created)
 ```
 
 ### vack help                              
@@ -169,7 +169,7 @@ $ vack h
 Variables
 ---------
 
-### `VACK_PATH`
+### `VACKPATH`
 
 The path of the root package directory.
 Default value is `$HOME/.vim/pack/vack`.
