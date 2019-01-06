@@ -41,14 +41,17 @@ Requirements
 Installtion
 -----------
 
-vil is a simple shell script.
+1. Copy `vack` into your `$PATH`.
+2. Make `vack` Executable.
 
-The following instructions assume that `~/bin` is on your `$PATH`. If that is not the case, you can substitute your favorite location.
+### Example
 
 ```
-curl -L https://raw.githubusercontent.com/kusabashira/vack/master/vack > ~/bin/vack
-chmod 755 ~/bin/vack
+$ curl -L https://raw.githubusercontent.com/kusabashira/vack/master/vack > ~/bin/vack
+$ chmod +x ~/bin/vack
 ```
+
+Note: In this example, `$HOME/bin` must be included in `$PATH`.
 
 Commands
 --------
