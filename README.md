@@ -58,23 +58,23 @@ Commands
 Install the packages from the repositories.
 
 `-o` and `-s` are flags that change the instllation destination.
-If `-o` is specified, they will be installed in `opt`,
-and if `-s` is specified, they will be installed in `start`.
-By default they will be installed to `start`.
+If `-o` is specified, it installs the packages into `opt`.
+If `-s` is specified, it installs the packages into `start`.
+By default, it installes the packages into `start`.
 
 ```
 $ vack i kusabashira/vim-incopen
-(Install vim-incopen in start)
+(Install vim-incopen into start)
 
-$ vack i -Ho kusabashira/vim-incopen
-(Install vim-incopen in opt and don't execute helptags)
+$ vack i -o kusabashira/vim-incopen
+(Install vim-incopen into opt)
 ```
 
 ### vack update [-a] \<package\>...        
 
 Update the packages.
 
-If `-a` is specified, all packages will be updated.
+If `-a` is specified, it updates all packages.
 
 ```
 $ vack u kusabashira/vim-incopen
@@ -98,10 +98,10 @@ $ vack r kusabashira/vim-incopen
 List installed packages.
 
 `-a`,`-o` and `s` are flags that change the target packages.
-If `-a` is specified, All packages will be listed,
-and if `-o` is specified, only the opt packages will be listed,
-and if `-s` is specified, only the start packages will be listed,
-By default all package will be listed.
+If `-a` is specified, it lists all packages.
+If `-o` is specified, it lists only the opt packages.
+If `-s` is specified, it lists only the start packages.
+By default it lists all package.
 
 ```
 $ vack l
@@ -116,9 +116,9 @@ vim-incopen
 
 ### vack path [-a] \<package\>...            
 
-Show install directories of the packages.
+Show the path of the packages.
 
-If `-a` is specified, all directories will be shown.
+If `-a` is specified, It shows all path of the packages.
 
 ```
 $ vack p vim-incopen
@@ -136,7 +136,7 @@ Move the packages from opt to start.
 
 ```
 $ vack e vim-incopen
-(move vim-incopen from opt to start)
+(Move vim-incopen from opt to start)
 ```
 
 ### vack disable \<package\>...              
@@ -145,7 +145,7 @@ Move the packages from start to opt.
 
 ```
 $ vack d vim-incopen
-(move vim-incopen from start to opt)
+(Move vim-incopen from start to opt)
 ```
 
 ### vack init                              
@@ -154,16 +154,16 @@ Create the root package directory.
 
 ```
 $ vack I
-($VACKPATH will be created)
+(Create $VACKPATH)
 ```
 
 ### vack help                              
 
-show this help message.
+Print usage.
 
 ```
 $ vack h
-(usage printed)
+(Print usage)
 ```
 
 Variables
@@ -179,7 +179,7 @@ Misc
 
 ### misc/vack.bash
 
-It provides an auto-completion for Bash.
+An auto-completion script for Bash.
 
 License
 -------
