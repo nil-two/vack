@@ -1,7 +1,7 @@
 vack
 ====
 
-manage vim packages.
+Manage vim packages.
 
 ```
 $ vack i thinca/vim-quickrun
@@ -169,7 +169,7 @@ $ vack h
 Variables
 ---------
 
-### `VACKPATH`
+### VACKPATH
 
 The path of the root package directory.
 Default value is `$HOME/.vim/pack/vack`.
