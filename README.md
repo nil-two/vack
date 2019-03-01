@@ -184,6 +184,10 @@ Misc
 
 An auto-completion script for Bash.
 
+### misc/\_vack
+
+An auto-completion script for Zsh.
+
 License
 -------
 

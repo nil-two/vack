@@ -1,0 +1,64 @@
+#compdef vack
+
+_vack() {
+  if (( $CURRENT == 2 )); then
+    _values "command" \
+      "install[install the packages]" \
+      "update[update the packages]" \
+      "remove[remove the packages]" \
+      "list[list installed packages]" \
+      "path[show install directory of the package]" \
+      "enable[move the packages to start]" \
+      "disable[move the packages to opt]" \
+      "init[create the package directory]" \
+      "help[show this help message]"
+  else
+    local cmd=${words[2]}
+    local cur=${words[$CURRENT]}
+    words=(${words[1]} ${words[3,-1]})
+    case $cmd in
+      i|install)
+        _values "options" \
+          "-o[install the packages into opt]" \
+          "-s[install the packages into start]"
+        ;;
+      u|update)
+        case $cur in
+          -*)
+            _values "options" \
+              "-a[update all packages]"
+            ;;
+          *)
+            _values "packages" $(vack l)
+            ;;
+        esac
+        ;;
+      r|remove)
+        _values "packages" $(vack l)
+        ;;
+      l|list)
+        _values "options" \
+          "-a[list all packages]" \
+          "-o[list opt packages]" \
+          "-s[list start packages]"
+        ;;
+      p|path)
+        case $cur in
+          -*)
+            _values "options" \
+              "-a[show the path of the all packages]"
+            ;;
+          *)
+            _values "packages" $(vack l)
+            ;;
+        esac
+        ;;
+      e|enable)
+        _values "packages" $(vack l -o)
+        ;;
+      d|disable)
+        _values "packages" $(vack l -s)
+        ;;
+    esac
+  fi
+}
