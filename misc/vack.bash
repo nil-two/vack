@@ -1,95 +1,57 @@
 _vack()
 {
-  local cur=${COMP_WORDS[COMP_CWORD]}
+  local cur prev words cword split
+  _init_completion || return
 
-  case $COMP_CWORD in
+  local defaultIFS=$' \t\n'
+  local IFS=$defaultIFS
+
+  case $cword in
     1)
-      local cmds="install update remove list path enable disable init help"
-      COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+      COMPREPLY=( $(compgen -W 'install update remove list path enable disable init help' -- "$cur") )
       ;;
     *)
-      local cmd=${COMP_WORDS[1]}
-      case $cmd in
+      case ${words[1]} in
         i|install)
           case $cur in
-            -*)
-              local opts="-o -s --"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              COMPREPLY=()
-              ;;
+            -*) COMPREPLY=( $(compgen -W '-o -s --' -- "$cur") ) ;;
+            *)  COMPREPLY=()
           esac
           ;;
         u|update)
           case $cur in
-            -)
-              local opts="-a --"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              local pkgs=$(vack list)
-              COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
-              ;;
+            -) COMPREPLY=( $(compgen -W '-a --' -- "$cur") ) ;;
+            *) IFS=$'\n'; COMPREPLY=( $(compgen -W '$(vack list)' -- "$cur") ); IFS=$defaultIFS ;;
           esac
           ;;
         r|remove)
           case $cur in
-            -)
-              local opts="--"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              local pkgs=$(vack list)
-              COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
-              ;;
+            -) COMPREPLY=( $(compgen -W '--' -- "$cur") ) ;;
+            *) IFS=$'\n'; COMPREPLY=( $(compgen -W '$(vack list)' -- "$cur") ); IFS=$defaultIFS ;;
           esac
           ;;
         l|list)
           case $cur in
-            -)
-              local opts="-a -o -s --"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              COMPREPLY=()
-              ;;
+            -) COMPREPLY=( $(compgen -W '-a -o -s --' -- "$cur") ) ;;
+            *) COMPREPLY=() ;;
           esac
           ;;
         p|path)
           case $cur in
-            -)
-              local opts="-a --"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              local pkgs=$(vack list)
-              COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
-              ;;
+            -) COMPREPLY=( $(compgen -W '-a --' -- "$cur") ) ;;
+            *) IFS=$'\n'; COMPREPLY=( $(compgen -W '$(vack list)' -- "$cur") ); IFS=$defaultIFS ;;
           esac
           ;;
         e|enable)
           case $cur in
-            -)
-              local opts="--"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              local pkgs=$(vack list -o)
-              COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
-              ;;
+            -) COMPREPLY=( $(compgen -W '--' -- "$cur") ) ;;
+            *) IFS=$'\n'; COMPREPLY=( $(compgen -W '$(vack list -o)' -- "$cur") ); IFS=$defaultIFS ;;
           esac
           ;;
         d|disable)
           case $cur in
-            -)
-              local opts="--"
-              COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-              ;;
-            *)
-              local pkgs=$(vack list -s)
-              COMPREPLY=( $(compgen -W "$pkgs" -- "$cur") )
-              ;;
+            -) COMPREPLY=( $(compgen -W '--' -- "$cur") ) ;;
+            *) IFS=$'\n'; COMPREPLY=( $(compgen -W '$(vack list -s)' -- "$cur") ); IFS=$defaultIFS ;;
           esac
           ;;
         I|init)
