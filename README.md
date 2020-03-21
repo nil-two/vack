@@ -1,7 +1,7 @@
 vack
 ====
 
-Manage vim packages.
+Manage vim plugins.
 
 ```
 $ vack i thinca/vim-quickrun
@@ -16,21 +16,21 @@ Usage
 
 ```
 $ vack <command> [...]
-manage Vim packages.
+manage Vim plugins.
 
 commands:
-  i|install [-os] <repository>...   # install the packages
-  u|update [-a] <package>...        # update the packages
-  r|remove <package>...             # remove the packages
-  l|list [-aos]                     # list installed packages
-  p|path [-a] <package>...          # show install directory of the package
-  e|enable <package>...             # move the packages to start
-  d|disable <package>...            # move the packages to opt
-  I|init                            # create the package directory
-  h|help                            # show this help message
+  i|install [-os] <repository>...   # install the plugins
+  u|update [-a] <plugin>...         # update the plugins
+  r|remove <plugin>...              # remove the plugins
+  l|list [-aos]                     # list installed plugins
+  p|path [-a] <plugin>...           # show the path of the plugins
+  e|enable <plugin>...              # move the plugins to start
+  d|disable <plugin>...             # move the plugins to opt
+  I|init                            # create the plugin directory
+  h|help                            # print usage
 
 environment-variables:
-  VACKPATH   # the package directory (default: $HOME/.vim/pack/vack)
+  VACKPATH   # the plugin directory (default: $HOME/.vim/pack/vack)
 ```
 
 Requirements
@@ -42,7 +42,7 @@ Installtion
 -----------
 
 1. Copy `vack` into your `$PATH`.
-2. Make `vack` Executable.
+2. Make `vack` executable.
 
 ### Example
 
@@ -56,14 +56,14 @@ Note: In this example, `$HOME/bin` must be included in `$PATH`.
 Commands
 --------
 
-### vack install [-os] \<repository\>...   
+### vack install [-os] \<repository\>...
 
-Install the packages from the repositories.
+Install the plugins from the repositories.
 
 `-o` and `-s` are flags that change the instllation destination.
-If `-o` is specified, it installs the packages into `opt`.
-If `-s` is specified, it installs the packages into `start`.
-By default, it installes the packages into `start`.
+If `-o` is specified, it installs the plugins into `opt`.
+If `-s` is specified, it installs the plugins into `start`.
+By default, it installes the plugins into `start`.
 
 ```
 $ vack i kusabashira/vim-incopen
@@ -73,38 +73,38 @@ $ vack i -o kusabashira/vim-incopen
 (Install vim-incopen into opt)
 ```
 
-### vack update [-a] \<package\>...        
+### vack update [-a] \<plugin\>...
 
-Update the packages.
+Update the plugins.
 
-If `-a` is specified, it updates all packages.
+If `-a` is specified, it updates all plugins.
 
 ```
 $ vack u kusabashira/vim-incopen
 (Update vim-incopen)
 
 $ vack -a
-(Update all packages)
+(Update all plugins)
 ```
 
-### vack remove \<package\>...               
+### vack remove \<plugin\>...
 
-Remove the packages.
+Remove the plugins.
 
 ```
 $ vack r kusabashira/vim-incopen
 (Remove vim-incopen)
 ```
 
-### vack list [-aos]                       
+### vack list [-aos]
 
-List installed packages.
+List installed plugins.
 
-`-a`,`-o` and `s` are flags that change the target packages.
-If `-a` is specified, it lists all packages.
-If `-o` is specified, it lists only the opt packages.
-If `-s` is specified, it lists only the start packages.
-By default it lists all package.
+`-a`,`-o` and `s` are flags that change the target plugins.
+If `-a` is specified, it lists all plugins.
+If `-o` is specified, it lists only the opt plugins.
+If `-s` is specified, it lists only the start plugins.
+By default it lists all plugin.
 
 ```
 $ vack l
@@ -117,11 +117,11 @@ vim-incopen
 ...
 ```
 
-### vack path [-a] \<package\>...            
+### vack path [-a] \<plugin\>...
 
-Show the path of the packages.
+Show the path of the plugins.
 
-If `-a` is specified, It shows all path of the packages.
+If `-a` is specified, It shows all path of the plugins.
 
 ```
 $ vack p vim-incopen
@@ -133,34 +133,34 @@ $ vack p -a
 ...
 ```
 
-### vack enable \<package\>...               
+### vack enable \<plugin\>...
 
-Move the packages from opt to start.
+Move the plugins to start.
 
 ```
 $ vack e vim-incopen
 (Move vim-incopen from opt to start)
 ```
 
-### vack disable \<package\>...              
+### vack disable \<plugin\>...
 
-Move the packages from start to opt.
+Move the plugins to opt.
 
 ```
 $ vack d vim-incopen
 (Move vim-incopen from start to opt)
 ```
 
-### vack init                              
+### vack init
 
-Create the root package directory.
+Create the root plugin directory.
 
 ```
 $ vack I
 (Create $VACKPATH)
 ```
 
-### vack help                              
+### vack help
 
 Print usage.
 
@@ -174,7 +174,7 @@ Variables
 
 ### VACKPATH
 
-The path of the root package directory.
+The path of the root plugin directory.
 Default value is `$HOME/.vim/pack/vack`.
 
 Misc

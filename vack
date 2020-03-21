@@ -6,21 +6,21 @@ VACKPATH=${VACKPATH-$HOME/.vim/pack/vack}
 usage() {
   cat <<__USAGE__ >&2
 usage: ${0##*/} <command> [...]
-manage Vim packages.
+manage Vim plugins.
 
 commands:
-  i|install [-os] <repository>...   # install the packages
-  u|update [-a] <package>...        # update the packages
-  r|remove <package>...             # remove the packages
-  l|list [-aos]                     # list installed packages
-  p|path [-a] <package>...          # show install directory of the package
-  e|enable <package>...             # move the packages to start
-  d|disable <package>...            # move the packages to opt
-  I|init                            # create the package directory
-  h|help                            # show this help message
+  i|install [-os] <repository>...   # install the plugins
+  u|update [-a] <plugin>...         # update the plugins
+  r|remove <plugin>...              # remove the plugins
+  l|list [-aos]                     # list installed plugins
+  p|path [-a] <plugin>...           # show the path of the plugins
+  e|enable <plugin>...              # move the plugins to start
+  d|disable <plugin>...             # move the plugins to opt
+  I|init                            # create the plugin directory
+  h|help                            # print usage
 
 environment-variables:
-  VACKPATH   # the package directory (default: \$HOME/.vim/pack/vack)
+  VACKPATH   # the plugin directory (default: \$HOME/.vim/pack/vack)
 __USAGE__
 }
 
@@ -28,20 +28,20 @@ warn() {
   printf "%s\n" "${0##*/}: $*" >&2
 }
 
-to_start_package_path() {
-  package=$1
-  printf "%s\n" "$VACKPATH/start/${package##*/}"
+to_start_plugin_path() {
+  plugin=$1
+  printf "%s\n" "$VACKPATH/start/${plugin##*/}"
 }
 
-to_opt_package_path() {
-  package=$1
-  printf "%s\n" "$VACKPATH/opt/${package##*/}"
+to_opt_plugin_path() {
+  plugin=$1
+  printf "%s\n" "$VACKPATH/opt/${plugin##*/}"
 }
 
-to_installed_package_path() {
-  package=$1
-  start=$(to_start_package_path "$package")
-  opt=$(to_opt_package_path "$package")
+to_installed_plugin_path() {
+  plugin=$1
+  start=$(to_start_plugin_path "$plugin")
+  opt=$(to_opt_plugin_path "$plugin")
   if [ -d "$start" ]; then
     printf "%s\n" "$start"
   elif [ -d "$opt" ]; then
@@ -51,19 +51,19 @@ to_installed_package_path() {
   fi
 }
 
-to_destination_package_path() {
-  package=$1
-  package_type=$2
-  case $package_type in
-    start) printf "%s\n" "$(to_start_package_path "$package")" ;;
-    opt)   printf "%s\n" "$(to_opt_package_path "$package")" ;;
+to_destination_plugin_path() {
+  plugin=$1
+  plugin_type=$2
+  case $plugin_type in
+    start) printf "%s\n" "$(to_start_plugin_path "$plugin")" ;;
+    opt)   printf "%s\n" "$(to_opt_plugin_path "$plugin")" ;;
     *)     echo ;;
   esac
 }
 
 to_source_url() {
-  package=$1
-  printf "%s\n" "$package" | awk '
+  plugin=$1
+  printf "%s\n" "$plugin" | awk '
     /^[^\/]+$/                 { print "git://github.com/vim-scripts/" $0; next }
     /^[^\/]+\/[^\/]+$/         { print "git://github.com/" $0; next }
     /^[^\/]+\/[^\/]+\/[^\/]+$/ { print "git://" $0; next }
@@ -71,46 +71,46 @@ to_source_url() {
   '
 }
 
-list_start_package() {
+list_start_plugin() {
   ls -- "$VACKPATH/start" | cat
 }
 
-list_opt_package() {
+list_opt_plugin() {
   ls -- "$VACKPATH/opt" | cat
 }
 
-list_all_package() {
-  list_start_package
-  list_opt_package
+list_all_plugin() {
+  list_start_plugin
+  list_opt_plugin
 }
 
 helptags() {
-  package_path=$1
-  doc_path=$package_path/doc
+  plugin_path=$1
+  doc_path=$plugin_path/doc
   if [ -d "$doc_path" ]; then
     vim +"helptags $doc_path" +"qa"
   fi
 }
 
 cmd_install() {
-  package_type=start
+  plugin_type=start
   while getopts "os" OPT; do
     case $OPT in
-      o) package_type=opt ;;
-      s) package_type=start ;;
+      o) plugin_type=opt ;;
+      s) plugin_type=start ;;
       *) exit 2 ;;
     esac
   done
   shift $(($OPTIND - 1))
 
   if [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
-  for package in "$@"; do
-    src_url=$(to_source_url "$package")
-    dst_path=$(to_destination_package_path "$package" "$package_type")
+  for plugin in "$@"; do
+    src_url=$(to_source_url "$plugin")
+    dst_path=$(to_destination_plugin_path "$plugin" "$plugin_type")
     if [ ! -d "$dst_path" ]; then
       git clone --quiet --depth=1 -- "$src_url" "$dst_path"
       helptags "$dst_path"
@@ -129,7 +129,7 @@ cmd_update() {
   shift $(($OPTIND - 1))
 
   if ! "$update_all" && [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
@@ -140,8 +140,8 @@ cmd_update() {
       fi
     done
   else
-    for package in "$@"; do
-      path=$(to_installed_package_path "$package")
+    for plugin in "$@"; do
+      path=$(to_installed_plugin_path "$plugin")
       if [ -d "$path" ] && [ -d "$path/.git" ]; then
         (cd "$path"; git pull --quiet --no-ff; helptags "$path")
       fi
@@ -158,12 +158,12 @@ cmd_remove() {
   shift $(($OPTIND - 1))
 
   if [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
-  for package in "$@"; do
-    path=$(to_installed_package_path "$package")
+  for plugin in "$@"; do
+    path=$(to_installed_plugin_path "$plugin")
     if [ -d "$path" ]; then
       rm -rf -- "$path"
     fi
@@ -171,21 +171,21 @@ cmd_remove() {
 }
 
 cmd_list() {
-  package_type=all
+  plugin_type=all
   while getopts "aos" OPT; do
     case $OPT in
-      a) package_type=all ;;
-      o) package_type=opt ;;
-      s) package_type=start ;;
+      a) plugin_type=all ;;
+      o) plugin_type=opt ;;
+      s) plugin_type=start ;;
       *) exit 2 ;;
     esac
   done
   shift $(($OPTIND - 1))
 
-  case $package_type in
-    all)   list_all_package   ;;
-    start) list_start_package ;;
-    opt)   list_opt_package   ;;
+  case $plugin_type in
+    all)   list_all_plugin   ;;
+    start) list_start_plugin ;;
+    opt)   list_opt_plugin   ;;
   esac
 }
 
@@ -200,7 +200,7 @@ cmd_path() {
   shift $(($OPTIND - 1))
 
   if ! "$show_all" && [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
@@ -211,8 +211,8 @@ cmd_path() {
       fi
     done
   else
-    for package in "$@"; do
-      path=$(to_installed_package_path "$package")
+    for plugin in "$@"; do
+      path=$(to_installed_plugin_path "$plugin")
       if [ -d "$path" ]; then
         printf "%s\n" "$path"
       fi
@@ -229,13 +229,13 @@ cmd_enable() {
   shift $(($OPTIND - 1))
 
   if [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
-  for package in "$@"; do
-    src=$(to_opt_package_path "$package")
-    dst=$(to_start_package_path "$package")
+  for plugin in "$@"; do
+    src=$(to_opt_plugin_path "$plugin")
+    dst=$(to_start_plugin_path "$plugin")
     if [ -d "$src" ] && [ ! -d "$dst" ]; then
       mv -- "$src" "$dst"
     fi
@@ -251,13 +251,13 @@ cmd_disable() {
   shift $(($OPTIND - 1))
 
   if [ $# -lt 1 ]; then
-    warn "no input packages"
+    warn "no input plugins"
     exit 2
   fi
 
-  for package in "$@"; do
-    src=$(to_start_package_path "$package")
-    dst=$(to_opt_package_path "$package")
+  for plugin in "$@"; do
+    src=$(to_start_plugin_path "$plugin")
+    dst=$(to_opt_plugin_path "$plugin")
     if [ -d "$src" ] && [ ! -d "$dst" ]; then
       mv -- "$src" "$dst"
     fi
