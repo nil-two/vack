@@ -64,9 +64,9 @@ to_destination_plugin_path() {
 to_source_url() {
   plugin=$1
   printf "%s\n" "$plugin" | awk '
-    /^[^\/]+$/                 { print "git://github.com/vim-scripts/" $0; next }
-    /^[^\/]+\/[^\/]+$/         { print "git://github.com/" $0; next }
-    /^[^\/]+\/[^\/]+\/[^\/]+$/ { print "git://" $0; next }
+    /^[^\/]+$/                 { print "https://github.com/vim-scripts/" $0; next }
+    /^[^\/]+\/[^\/]+$/         { print "https://github.com/" $0; next }
+    /^[^\/]+\/[^\/]+\/[^\/]+$/ { print "https://" $0; next }
                                { print $0; next }
   '
 }
