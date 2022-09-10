@@ -47,7 +47,7 @@ Installtion
 ### Example
 
 ```
-$ curl -L https://raw.githubusercontent.com/nil2nekoni2/vack/master/vack > ~/bin/vack
+$ curl -L https://raw.githubusercontent.com/nil-two/vack/master/vack > ~/bin/vack
 $ chmod +x ~/bin/vack
 ```
 
@@ -66,10 +66,10 @@ If `-s` is specified, it installs the plugins into `start`.
 By default, it installes the plugins into `start`.
 
 ```
-$ vack i nil2nekoni/vim-incopen
+$ vack i nil-two/vim-incopen
 (Install vim-incopen into start)
 
-$ vack i -o nil2nekoni/vim-incopen
+$ vack i -o nil-two/vim-incopen
 (Install vim-incopen into opt)
 ```
 
@@ -80,7 +80,7 @@ Update the plugins.
 If `-a` is specified, it updates all plugins.
 
 ```
-$ vack u nil2nekoni/vim-incopen
+$ vack u nil-two/vim-incopen
 (Update vim-incopen)
 
 $ vack -a
@@ -92,7 +92,7 @@ $ vack -a
 Remove the plugins.
 
 ```
-$ vack r nil2nekoni/vim-incopen
+$ vack r nil-two/vim-incopen
 (Remove vim-incopen)
 ```
 
